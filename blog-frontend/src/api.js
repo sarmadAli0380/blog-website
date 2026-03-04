@@ -1,20 +1,13 @@
-const API_BASE = process.env.REACT_APP_API_URL ;
+// src/api.js
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000"; // fallback for local dev
 
 const TOKEN_KEY = "blogify_token";
 
 export const auth = {
-  getToken() {
-    return localStorage.getItem(TOKEN_KEY);
-  },
-  setToken(token) {
-    localStorage.setItem(TOKEN_KEY, token);
-  },
-  clearToken() {
-    localStorage.removeItem(TOKEN_KEY);
-  },
-  isLoggedIn() {
-    return !!localStorage.getItem(TOKEN_KEY);
-  },
+  getToken() { return localStorage.getItem(TOKEN_KEY); },
+  setToken(token) { localStorage.setItem(TOKEN_KEY, token); },
+  clearToken() { localStorage.removeItem(TOKEN_KEY); },
+  isLoggedIn() { return !!localStorage.getItem(TOKEN_KEY); },
 };
 
 function escapeHtml(str = "") {
@@ -65,30 +58,10 @@ async function apiFetch(path, options = {}) {
 }
 
 export const api = {
-  async signup({ name, email, password }) {
-    return apiFetch("/api/users/signup", {
-      method: "POST",
-      body: JSON.stringify({ name, email, password }),
-    });
-  },
-  async login({ email, password }) {
-    return apiFetch("/api/users/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-  },
+  async signup({ name, email, password }) { return apiFetch("/api/users/signup", { method: "POST", body: JSON.stringify({ name, email, password }) }); },
+  async login({ email, password }) { return apiFetch("/api/users/login", { method: "POST", body: JSON.stringify({ email, password }) }); },
   async me() { return apiFetch("/api/users/me"); },
-  async getBlogs() {
-    const data = await apiFetch("/api/blogs");
-    return Array.isArray(data) ? data.map(normalizeBlog) : [];
-  },
-  async getBlogById(id) {
-    const b = await apiFetch(`/api/blogs/${id}`);
-    return normalizeBlog(b);
-  },
-  async createBlog({ title, description, content, image }) {
-    const payload = { title, description, content, image: image || "https://via.placeholder.com/600x300" };
-    const created = await apiFetch("/api/blogs", { method: "POST", body: JSON.stringify(payload) });
-    return normalizeBlog(created?.data || created);
-  },
+  async getBlogs() { const data = await apiFetch("/api/blogs"); return Array.isArray(data) ? data.map(normalizeBlog) : []; },
+  async getBlogById(id) { const b = await apiFetch(`/api/blogs/${id}`); return normalizeBlog(b); },
+  async createBlog({ title, description, content, image }) { const payload = { title, description, content, image: image || "https://via.placeholder.com/600x300" }; const created = await apiFetch("/api/blogs", { method: "POST", body: JSON.stringify(payload) }); return normalizeBlog(created?.data || created); },
 };
